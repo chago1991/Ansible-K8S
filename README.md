@@ -1,6 +1,6 @@
 # Ansible-K8S
 ## Description:
-This project is going to deply a K8S cluster by using Ansible. It cloud deploy a simple cluster or a highly available cluster. It contains 3 roles (**role-lbg**, **role-containerd**, and **role-k8s**), a simple Ansible configuration file (**ansible.cfg**), a inventory file (**hosts*) and etc.
+This project is going to deply a K8S cluster by using Ansible. It cloud deploy a simple cluster or a highly available cluster. It contains 3 roles (**role-lbg**, **role-containerd**, and **role-k8s**), a simple Ansible configuration file (**ansible.cfg**), a inventory file (**hosts**) and etc.
 ```
 .
 ├── ansible.cfg
