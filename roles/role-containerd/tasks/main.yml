@@ -1,0 +1,111 @@
+---
+# tasks file for roles/role-containerd
+
+# Update system
+- name: Update system
+  ansible.builtin.package:
+    name: '*'
+    state: latest
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Enable overlay and br_netfilter kernel modules
+- name: Enable overlay and br_netfilter
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - overlay
+  - br_netfilter
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Add overlay and br_netfilter kernel modules at boot
+- name: Add overlay br_netfilter
+  template:
+    src: ./roles/role-containerd/templates/temp-containerd.conf.j2
+    dest: /etc/modules-load.d/containerd.conf
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Add containerd.service file
+- name: Add overlay br_netfilter
+  template:
+    src: ./roles/role-containerd/templates/temp-containerd.service.j2
+    dest: /lib/systemd/system/containerd.service
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Enable net.ipv4.ip_forward, net.bridge.bridge-nf-call-iptables and net.bridge.bridge-nf-call-ip6tables
+- name: Enable kernel parameters
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '1'
+    sysctl_set: yes
+    sysctl_file: /etc/sysctl.d/99-containerd.conf
+    state: present
+    reload: yes
+  with_items:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Install runc
+- name: Install runc
+  ansible.builtin.package:
+    name: 
+    - runc
+    - bash-completion
+    state: latest
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Download containerd
+- name: Download containerd
+  get_url:
+    url: https://github.com/containerd/containerd/releases/download/v1.6.16/containerd-1.6.16-linux-amd64.tar.gz
+    dest: /tmp/containerd-1.6.16-linux-amd64.tar.gz
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5  
+
+# Install and config containerd
+- name: Install and config containerd
+  shell: |
+    tar xvf /tmp/containerd-1.6.16-linux-amd64.tar.gz -C /usr
+    mkdir -p /etc/containerd
+    containerd config default > /etc/containerd/config.toml
+    sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+  args:
+    executable: /bin/bash
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Enable and restart containerd service
+- name: Enable and restart containerd service
+  service: 
+    name: containerd
+    state: restarted
+    enabled: true
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+

@@ -1,0 +1,146 @@
+---
+# tasks file for roles/role-k8s
+#
+
+# Download Google apt gpg key
+- name: Download Google apt gpg key
+  ansible.builtin.get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Disable swap and add apt repo
+- name: Disable swap and apt repo
+  ansible.builtin.shell: |
+    swapoff -a
+    sed 's/.*swap.*//g' /etc/fstab
+    echo "deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+  args:
+    executable: /bin/bash
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Install apt-transport-https ca-certificates curl
+- name: Install apt-transport-https ca-certificates curl
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - apt-transport-https 
+  - ca-certificates 
+  - curl
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Update the apt cache
+- name: Update the apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Install kubelet kubeadm and kubectl
+- name: Install kubelet kubeadm and kubectl
+  ansible.builtin.package:
+    name: "{{ k8s_packages }}"
+    state: present
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Disable kubelet kubeadm kubectl from apt upgrade
+- name: Disable kubelet kubeadm and kubectl from apt upgrade
+  ansible.builtin.shell: |
+    apt-mark hold kubelet kubeadm kubectl
+  args:
+    executable: /bin/bash
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Initial K8S cluster on the first master node
+- name: kubeadm init on the first master node
+  shell: |
+    kubeadm init --control-plane-endpoint {{ k8s_vip }}:6443 --upload-certs --kubernetes-version {{ k8s_version }} --pod-network-cidr {{ pod_cidr }} > kubeadm-init-output.txt
+  args:
+    executable: /bin/bash
+  when: ansible_hostname == groups.masterg[0]
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+
+# Get kubeadm join information
+- name: Get join info
+  shell: |
+    cat kubeadm-init-output.txt | grep -B 2 '\-\-control-plane \-\-certificate-key' | awk '/kubeadm/ {print $(NF-1)}'
+    cat kubeadm-init-output.txt | grep -B 2 '\-\-control-plane \-\-certificate-key' | awk '/-cert-hash/ {print $(NF-1)}'
+    cat kubeadm-init-output.txt | grep -B 2 '\-\-control-plane \-\-certificate-key' | awk '/certificate-key/ {print $(NF)}'
+  args:
+    executable: /bin/bash
+  register: join_info
+  when: ansible_hostname == groups.masterg[0]
+
+# Set join info as facts
+- name: Set join info as facts
+  set_fact:
+    join_info = "{{ join_info }}"
+  when: ansible_hostname == groups.masterg[0]
+
+# Join a node as a master node
+- name: Join a node as a master node
+  shell: |
+    kubeadm join "{{ k8s_vip }}":6443 --token "{{ hostvars[groups['masterg'][0]]['join_info']['stdout_lines'][0] }}" --discovery-token-ca-cert-hash "{{ hostvars[groups['masterg'][0]]['join_info']['stdout_lines'][1] }}" --control-plane --certificate-key "{{ hostvars[groups['masterg'][0]]['join_info']['stdout_lines'][2] }}"
+  args:
+    executable: /bin/bash
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+  when: ansible_hostname in groups['masterg'] and (ansible_hostname != groups.masterg[0])
+
+# Join a node as a worker node
+- name: Join a node as a worker node
+  shell: |
+    kubeadm join "{{ k8s_vip }}":6443 --token "{{ hostvars[groups['masterg'][0]]['join_info']['stdout_lines'][0] }}" --discovery-token-ca-cert-hash "{{ hostvars[groups['masterg'][0]]['join_info']['stdout_lines'][1] }}"
+  args:
+    executable: /bin/bash
+  when: ansible_hostname in groups['workerg']
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Config k8s context for the ansible remote user on masterg
+- name: Config k8s context for the ansible remote user on masterg
+  shell: |
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    echo 'source <(kubectl completion bash)' >> .bashrc
+  args:
+    executable: /bin/bash
+  become: no
+  when: ansible_hostname in groups['masterg']
+
+# Install Calico network plugin
+- name: Install Calico network plugin
+  shell: |
+    curl https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml -O
+    kubectl apply -f calico.yaml
+  args:
+    executable: /bin/bash
+  become: no
+  when: ansible_hostname == groups.masterg[0]

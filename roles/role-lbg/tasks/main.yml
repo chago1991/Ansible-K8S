@@ -1,0 +1,98 @@
+---
+# tasks file for roles/role-lbg
+# Update system
+- name: Update system
+  ansible.builtin.package:
+    name: '*'
+    state: latest
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+
+# Install keepalived and haproxy
+- name: Install keepalived and haproxy
+  ansible.builtin.package:
+    name:
+    - keepalived
+    - haproxy
+    state: present
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+
+# To generate haproxy configuration 
+- name: To generate haproxy configuration 
+  template:
+    src: ./roles/role-lbg/templates/temp-haproxy.j2
+    dest: /etc/haproxy/haproxy.cfg
+    backup: yes
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# To generate haproxy configuration 
+- name: To generate haproxy configuration
+  template:
+    src: ./roles/role-lbg/templates/temp-keepalived.j2
+    dest: /etc/keepalived/keepalived.conf
+    backup: yes
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# To enable and restart haproxy and keepalived 
+- name: To enable and restart haproxy and keepalived
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+  - haproxy
+  - keepalived
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+# Enable kernel Parameters net.ipv4.ip_forward net.ipv4.ip_nonlocal_bind
+- name: Enable kernel Parameters
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-haproxy.conf
+  with_items:
+    - net.ipv4.ip_forward
+    - net.ipv4.ip_nonlocal_bind
+  register: result
+  until: result.failed == false
+  retries: 2
+  delay: 5
+
+########################### 
+# Setup iptables
+#- name: iptables rules 
+#  ansible.builtin.iptables:
+#    chain: INPUT
+#    protocol: tcp
+#    destination_ports:
+#      - "6443"
+#    jump: ACCEPT
+#
+# Save iptables rules
+#- name: Save iptables rules
+#  shell: |
+#    if [[ ! -d /etc/iptables ]]; then mkdir /etc/iptables ; fi
+#    iptables-save > /etc/iptables/rules.v4
+#  args:
+#    executable: /bin/bash
+#
+

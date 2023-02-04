@@ -1,0 +1,17 @@
+### Don't change the gourp name or delete the group
+### Add a host entry under related group
+### Host entry format: HOSTNAME ansible_ssh_host=HOST-IP
+ 
+### The [lbg] is the load balancer nodes' group
+[lbg]
+
+
+### The [masterg] is the k8s control plane nodes' group
+[masterg]
+
+
+### The [workerg] is the k8s worker nodes' group
+[workerg]
+
+
+
