@@ -219,7 +219,7 @@ vi hosts
 ### Don't change the group name or delete the group
 ### Add a host entry under a related group
 ### Host entry format: HOSTNAME ansible_ssh_host=HOST-IP
-### Empty entry of a group that means the role will not be deployed
+### Empty host entry of a group that means the role will not be deployed
 
 ### The [lbg] is the load balancer nodes' group
 [lbg]
