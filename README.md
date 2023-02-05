@@ -151,9 +151,22 @@ vi /etc/hosts
 # run as myadmin
 ssh-copy-id OtherNodeIP
 ```
-3.2 Login Testing
+3.2 SSH remote login Testing
 ```
-# run as myadmin on Ansible node, it should shows "uid=0(root) gid=0(root) groups=0(root)“ without ask password
+# run as myadmin on Ansible node, it should show "uid=0(root) gid=0(root) groups=0(root)“ without ask password
 ssh OtherNodeIP "sudo id" 
 ```
+
+# Demo 1, deploy a simple k8s cluster
+
+My demo environment:
+
+- One Anisble node
+- One Master node:
+    - hostname: master01
+    - host ip: 192.168.1.3
+- Three worker nodes:
+    - hostname: worker01, worker02, and worker03
+    - ips: 192.168.1.6, 192.168.1.7, and 192.168.1.8 
+
 
