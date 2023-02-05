@@ -251,3 +251,8 @@ vi deploy-cluster.yaml
 ```
 <img width="806" alt="image" src="https://user-images.githubusercontent.com/9592837/216815180-21c99e9d-117d-40c2-a668-b47ba01a637b.png">
 
+1.5 Run the playbook - deploy-cluster.yaml
+
+```
+ansible-playbook deploy-cluster.yaml
+```
