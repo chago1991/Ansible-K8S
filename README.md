@@ -7,7 +7,7 @@ This project is going to deploy a K8S cluster by using Ansible. It could deploy 
 
 ## How it works:
 
-It contains 3 ansible roles. Assigning nodes to the ansible inventory groups to install related software, and set up configuration, to make the nodes to the roles of the K8S cluster.
+Assign a K8S node to an Ansible Inventory Group (Ansible Inventory File - hosts). The Ansible Playbook (deploy-cluster.yaml) will apply a related role(s) to the node to install corresponding software and set up associated configurations.
 
 ```
 .
