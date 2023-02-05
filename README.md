@@ -91,17 +91,21 @@ PS: This is just my practice. You don't know to follow if you are familiar with 
 ### Step 1. Prepare an ansible node (Rocky Linux 8.x):
 
 1.1 Choose minimal installation for OS install
+
 1.1.1 Create a user during the installation, my user is myadmin
+
 1.2 After system is installed, update system and install related packages.
 ```
 # Run as root
 dnf -y update && dnf -y install epel-release && dnf -y install ansible git
 ```
+
 1.3 Set SELinux to permissive mode (Which mode actually is not impacted. But I will set it to permissive )
 ```
 # Run as root
 setenforce 0 && sed -i 's/SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 ```
+
 1.4  Generate a SSH Key for myadmin
 ```
 # Run as myadmin
@@ -111,16 +115,19 @@ ssh-keygen
 ### Setp 2. Prepare other nodes (master nodes, worker nodes and load balancer nodes):
 
 2.1 Install Ubuntu 20.04.x LTS (also minimal installation) with openssh-server, also create a user myadmin
+
 2.2 After installation, Generate a SSH Key for user myadmin
 ```
 # Run as myadmin
 ssh-keygen
 ```
+
 2.3 Setup hostname, if you haven't set it
 ```
 # Run as root
 hostnamectl set-hostname XXX
 ```
+
 2.4 Make user myadmin sudo without password
 ```
 # Run as root, check "%sudo   ALL=(ALL:ALL) NOPASSWD: ALL"
@@ -135,6 +142,7 @@ sudo su -
 # (Optional) Run as root, if still ask for password
 usermod -a -G sudo myadmin
 ```
+
 2.4 Check /etc/hosts
 ```
 # Run as root, check "127.0.1.1 THE-HOST-NAME" is correct
@@ -151,6 +159,7 @@ vi /etc/hosts
 # run as myadmin
 ssh-copy-id OtherNodeIP
 ```
+
 3.2 SSH remote login Testing
 ```
 # run as myadmin on Ansible node, it should show "uid=0(root) gid=0(root) groups=0(root)“ without ask password
@@ -168,7 +177,6 @@ My demo environment:
 - Three worker nodes:
     - hostname: worker01, worker02, and worker03
     - ips: 192.168.1.6, 192.168.1.7, and 192.168.1.8 
-
 
 1.1 Clone the repo
 
