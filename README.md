@@ -175,6 +175,79 @@ My demo environment:
 
 ```
 # login to ansible node as myadmin, and make a Projects folder and clone the repo
+
 mkdir Projects && cd Projects
+git clone https://github.com/williamlui00/Ansible-K8S.git
+cd Ansible-K8S
 
 ```
+
+1.2 Modify ansible inventory, 
+
+```
+vi hosts
+### Don't change the gourp name or delete the group
+### Add a host entry under related group
+### Host entry format: HOSTNAME ansible_ssh_host=HOST-IP
+
+### The [lbg] is the load balancer nodes' group
+[lbg]
+
+
+### The [masterg] is the k8s control plane nodes' group
+[masterg]
+master01 ansible_ssh_host=192.168.1.3 ansible_ssh_user=myadmin
+
+### The [workerg] is the k8s worker nodes' group
+[workerg]
+worker01 ansible_ssh_host=192.168.1.6 ansible_ssh_user=myadmin
+worker02 ansible_ssh_host=192.168.1.7 ansible_ssh_user=myadmin
+worker03 ansible_ssh_host=192.168.1.8 ansible_ssh_user=myadmin
+
+```
+
+1.3 Make a ansible hot command to test, and you will see the output is "...uid=0(root)..."
+
+```
+$ ansible all -m shell -a id -b
+worker03 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+worker02 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+worker01 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+master01 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+
+```
+
+1.4 Modify the deploy-cluster.yaml, only change the k8s_vip to "master01's ip"
+
+PS: Ignore the frist k8s_vip, just change the second one.
+
+```
+vi deploy-cluster.yaml
+...(Skipped)
+- name: Deploy k8s nodes
+  hosts: masterg,workerg
+  become: yes
+  vars:
+### Change me(must)
+### k8s_vip: If you are going to deploy Load Balancers, this k8s_vip should the same as above, e.g., 192.168.0.10
+###          If you are not going to deploying multiple master nodes, this k8s_vip should be MASTER-NODE-IP
+### k8s_version: This playbook is going to install "1.25.0"
+### pod_cidr: This ip pool will be will by pods. If change it, make sure is /16
+### k8s_packages: The verison should be the same as k8s_version.
+    k8s_vip: "192.168.1.3" 
+    k8s_version: "1.25.0"
+    pod_cidr: "10.10.0.0/16"
+    k8s_packages:
+    - "kubelet=1.25.0-00"
+    - "kubeadm=1.25.0-00"
+    - "kubectl=1.25.0-00"
+  roles:
+    - role-k8s
+...(Skipped)
+```
+<img width="806" alt="image" src="https://user-images.githubusercontent.com/9592837/216815180-21c99e9d-117d-40c2-a668-b47ba01a637b.png">
+
