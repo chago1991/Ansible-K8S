@@ -86,7 +86,7 @@ For deploy a high availability cluster:
 
 ## Here are the steps to prepare the nodes both for deploy a simple cluster and a high availability cluster:
 
-PS: This is just my practice. You don't know to follow if you are familiar with ansible and linux.
+PS: This is just my practice. You don't need to follow if you are familiar with ansible and linux.
 
 ### Step 1. Prepare an ansible node (Rocky Linux 8.x):
 
