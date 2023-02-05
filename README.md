@@ -169,4 +169,12 @@ My demo environment:
     - hostname: worker01, worker02, and worker03
     - ips: 192.168.1.6, 192.168.1.7, and 192.168.1.8 
 
+## Deployment step 1
 
+1.1 Clone the repo
+
+```
+# login to ansible node as myadmin, and make a Projects folder and clone the repo
+mkdir Projects && cd Projects
+
+```
