@@ -81,8 +81,7 @@ Currently, it only support on "Ubuntu 20.04 LTS".
 ## Part 1. Requirement
 
 Description: 
-
-To ensure Ansible node can manage the K8S nodes. If you aleady do that you can skip this part.
+To setup an ansible node and other K8S nodes, to ensure the ansible node can manage other K8S nodes. If you aleady do that you can skip this part.
 
 For deploy a simple cluster (One master node):
 1. You need to prepare an ansible node
