@@ -1,7 +1,6 @@
 # Ansible-K8S
 
-
-## Description:
+Description:
 
 This project is going to deploy a K8S cluster by using Ansible. It could deploy a simple cluster or a highly available cluster. 
 
