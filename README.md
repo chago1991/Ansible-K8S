@@ -256,3 +256,5 @@ vi deploy-cluster.yaml
 ```
 ansible-playbook deploy-cluster.yaml
 ```
+You should see something like this, with failed=0
+<img width="806" alt="image" src="https://user-images.githubusercontent.com/9592837/216815467-faf00312-2ebf-482a-9abb-1d3f222890eb.png">
