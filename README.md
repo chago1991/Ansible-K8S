@@ -1,10 +1,10 @@
 # Ansible-K8S
 
-Description:
+### Description:
 
 This project is going to deploy a K8S cluster by using Ansible. It could deploy a simple cluster or a highly available cluster. 
 
-## How it works:
+### How it works:
 
 Assign a K8S node to an Ansible Inventory Group (Ansible Inventory File - hosts). The Ansible Playbook (deploy-cluster.yaml) will apply a related role(s) to the node to install corresponding software and set up associated configurations.
 
