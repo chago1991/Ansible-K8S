@@ -1,6 +1,14 @@
 # Ansible-K8S
+
+
 ## Description:
-This project is going to deply a K8S cluster by using Ansible. It cloud deploy a simple cluster or a highly available cluster. It contains 3 roles (**role-lbg**, **role-containerd**, and **role-k8s**), a simple Ansible configuration file (**ansible.cfg**), a inventory file (**hosts**) and etc.
+
+This project is going to deply a K8S cluster by using Ansible. It could deploy a simple cluster or a highly available cluster. 
+
+## How it works:
+
+It contains 3 ansible roles. Assigning nodes to the ansible inventory groups to install related software, and set up configuration, to make the nodes to the roles of the K8S cluster.
+
 ```
 .
 ├── ansible.cfg
@@ -69,9 +77,13 @@ This project is going to deply a K8S cluster by using Ansible. It cloud deploy a
 29 directories, 33 files
 ```
 **limitation**
-Currently, it only support on "Ubuntu 20.04.5 LTS".
+Currently, it only support on "Ubuntu 20.04 LTS".
 
-## REQUIREMENT
+## Part 1. Requirement
+
+Description: 
+
+To ensure Ansible node can manage the K8S nodes. If you aleady do that you can skip this part.
 
 For deploy a simple cluster (One master node):
 1. You need to prepare an ansible node
@@ -86,27 +98,28 @@ For deploy a high availability cluster:
 
 ## Here are the steps to prepare the nodes both for deploy a simple cluster and a high availability cluster:
 
-PS: This is just my practice. You don't need to follow if you are familiar with ansible and linux.
+### Step 1. Prepare an ansible node:
 
-### Step 1. Prepare an ansible node (Rocky Linux 8.x):
+1.1 Minimal installation Rocky Linux 8.x
 
-1.1 Choose minimal installation for OS install
-
-1.1.1 Create a user during the installation, my user is myadmin
+1.1.1 Create a user during the installation, my user is myadmin, also setup ip and hostname
 
 1.2 After system is installed, update system and install related packages.
+
 ```
 # Run as root
 dnf -y update && dnf -y install epel-release && dnf -y install ansible git
 ```
 
-1.3 Set SELinux to permissive mode (Which mode actually is not impacted. But I will set it to permissive )
+1.3 Set SELinux to permissive mode (Which mode actually is not impacted, but I will set it to permissive )
+
 ```
 # Run as root
 setenforce 0 && sed -i 's/SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 ```
 
 1.4  Generate a SSH Key for myadmin
+
 ```
 # Run as myadmin
 ssh-keygen
@@ -117,18 +130,21 @@ ssh-keygen
 2.1 Install Ubuntu 20.04.x LTS (also minimal installation) with openssh-server, also create a user myadmin
 
 2.2 After installation, Generate a SSH Key for user myadmin
+
 ```
 # Run as myadmin
 ssh-keygen
 ```
 
 2.3 Setup hostname, if you haven't set it
+
 ```
 # Run as root
 hostnamectl set-hostname XXX
 ```
 
 2.4 Make user myadmin sudo without password
+
 ```
 # Run as root, check "%sudo   ALL=(ALL:ALL) NOPASSWD: ALL"
 vi /etc/sudoers
@@ -144,6 +160,7 @@ usermod -a -G sudo myadmin
 ```
 
 2.4 Check /etc/hosts
+
 ```
 # Run as root, check "127.0.1.1 THE-HOST-NAME" is correct
 vi /etc/hosts
@@ -155,18 +172,22 @@ vi /etc/hosts
 ### Step 3, copy myadmin's public key to other nodes
 
 3.1 Login the ansible node as myadmin, copy myadmin's public key to other nodes one by one
+
 ```
 # run as myadmin
 ssh-copy-id OtherNodeIP
 ```
 
 3.2 SSH remote login Testing
+
 ```
 # run as myadmin on Ansible node, it should show "uid=0(root) gid=0(root) groups=0(root)“ without ask password
 ssh OtherNodeIP "sudo id" 
 ```
 
-# Demo 1, deploy a simple k8s cluster
+# Part 2. Demo 1, deploy a simple k8s cluster
+
+Description: 
 
 My demo environment:
 
