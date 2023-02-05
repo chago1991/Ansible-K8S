@@ -169,7 +169,6 @@ My demo environment:
     - hostname: worker01, worker02, and worker03
     - ips: 192.168.1.6, 192.168.1.7, and 192.168.1.8 
 
-## Deployment step 1
 
 1.1 Clone the repo
 
@@ -265,3 +264,25 @@ kubectl get nodes
 
 ```
 <img width="470" alt="image" src="https://user-images.githubusercontent.com/9592837/216815604-6eb49c4a-19ad-4192-bedb-747336f512e3.png">
+
+1.7 Testing kubectl 
+- Create a test deployment
+```
+kubectl create deployment --replicas 3 --image nginx my-nginx
+
+```
+
+<img width="471" alt="image" src="https://user-images.githubusercontent.com/9592837/216815762-93b1ee44-7aa3-4abc-a083-d4b09ce3fd31.png">
+
+- Create get the pods
+```
+kubectl get pods
+kubectl get pods -o wide
+```
+<img width="969" alt="image" src="https://user-images.githubusercontent.com/9592837/216815784-85951c5b-1958-4c99-8a0a-dbd235681d11.png">
+
+<Demo 1 done>
+
+# Demo 2, deploy a highly available cluster
+
+To Be Continued...
