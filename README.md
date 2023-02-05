@@ -3,7 +3,7 @@
 
 ## Description:
 
-This project is going to deply a K8S cluster by using Ansible. It could deploy a simple cluster or a highly available cluster. 
+This project is going to deploy a K8S cluster by using Ansible. It could deploy a simple cluster or a highly available cluster. 
 
 ## How it works:
 
@@ -189,6 +189,8 @@ ssh OtherNodeIP "sudo id"
 
 Description: 
 
+This part is going to demo how to setup a simple K8S cluster.
+
 My demo environment:
 
 - One Anisble node
@@ -214,9 +216,10 @@ cd Ansible-K8S
 
 ```
 vi hosts
-### Don't change the gourp name or delete the group
-### Add a host entry under related group
+### Don't change the group name or delete the group
+### Add a host entry under a related group
 ### Host entry format: HOSTNAME ansible_ssh_host=HOST-IP
+### Empty entry of a group that means the role will not be deployed
 
 ### The [lbg] is the load balancer nodes' group
 [lbg]
@@ -262,10 +265,10 @@ vi deploy-cluster.yaml
   vars:
 ### Change me(must)
 ### k8s_vip: If you are going to deploy Load Balancers, this k8s_vip should the same as above, e.g., 192.168.0.10
-###          If you are not going to deploying multiple master nodes, this k8s_vip should be MASTER-NODE-IP
+###          If you are not going to deploying multiple master nodes, this k8s_vip should be the MASTER-NODE-IP
 ### k8s_version: This playbook is going to install "1.25.0"
-### pod_cidr: This ip pool will be will by pods. If change it, make sure is /16
-### k8s_packages: The verison should be the same as k8s_version.
+### pod_cidr: This ip pool will be used by the pods. If change it, make sure is /16
+### k8s_packages: The verison should be the same as k8s_version. (End with "-00")
     k8s_vip: "192.168.1.3" 
     k8s_version: "1.25.0"
     pod_cidr: "10.10.0.0/16"
@@ -311,6 +314,8 @@ kubectl get pods -o wide
 <img width="969" alt="image" src="https://user-images.githubusercontent.com/9592837/216815784-85951c5b-1958-4c99-8a0a-dbd235681d11.png">
 
 <Demo 1 done>
+
+
 
 # Demo 2, deploy a highly available cluster
 
