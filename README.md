@@ -258,3 +258,10 @@ ansible-playbook deploy-cluster.yaml
 ```
 You should see something like this, with failed=0
 <img width="806" alt="image" src="https://user-images.githubusercontent.com/9592837/216815467-faf00312-2ebf-482a-9abb-1d3f222890eb.png">
+
+1.6 Login to master01 as myadmin to check the nodes status, you may need to wait a few minutes.
+```
+kubectl get nodes
+
+```
+<img width="470" alt="image" src="https://user-images.githubusercontent.com/9592837/216815604-6eb49c4a-19ad-4192-bedb-747336f512e3.png">
