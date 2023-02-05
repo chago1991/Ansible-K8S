@@ -6,9 +6,12 @@ This project is going to deploy a K8S cluster by using Ansible. It could deploy 
 
 ### How it works:
 
-- Assign a K8S node to an Ansible Inventory Group (Ansible Inventory File - hosts). 
-- The Ansible Playbook (deploy-cluster.yaml) will install corresponding software and set up associated configurations on the K8S node based on the assigned group. 
-- The K8S node will act as a K8S role (Load Balancer Node, Master Node, or Worker Node) after installation.
+- Set up K8S nodes to be managed by Ansible Node
+- Assign K8S node to Ansible Inventory Group (Ansible Inventory File - hosts). 
+- Ansible Inventory Group associates with an Ansible role(s). 
+- Ansible's roles (role-containerd, role-k8s, and role-lbg) define what needs to install and set up.
+- The Ansible Playbook (deploy-cluster.yaml) will apply the related role(s) to the K8S node based on the assigned group. 
+- The K8S node will act as a K8S role (Load Balancer Node, Master Node, or Worker Node) after running the playbook. 
 
 ```
 .
@@ -189,7 +192,7 @@ ssh OtherNodeIP "sudo id"
 
 Description: 
 
-This part is going to demo how to setup a simple K8S cluster.
+This part is going to demo how to set up a simple K8S cluster. If you want to deploy a highly available cluster. Skip this part.
 
 My demo environment:
 
