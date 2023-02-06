@@ -16,7 +16,7 @@
 - name: Disable swap and apt repo
   ansible.builtin.shell: |
     swapoff -a
-    sed 's/.*swap.*//g' /etc/fstab
+    sed -i 's/.*swap.*//g' /etc/fstab
     echo "deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
   args:
     executable: /bin/bash
