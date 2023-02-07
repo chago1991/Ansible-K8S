@@ -240,7 +240,7 @@ worker03 ansible_ssh_host=192.168.1.8 ansible_ssh_user=myadmin
 
 ```
 
-1.3 Make a ansible hot command to test, and you will see the output is "...uid=0(root)..."
+1.3 Make an ansible hot command to test, and you will see the output is "...uid=0(root)..."
 
 ```
 $ ansible all -m shell -a id -b
@@ -367,7 +367,7 @@ cd Ansible-K8S
 ### The [lbg] is the load balancer nodes' group
 [lbg]
 lb01 ansible_ssh_host=192.168.1.1 ansible_ssh_user=myadmin
-lb02 ansible_ssh_host=192.168.1.1 ansible_ssh_user=myadmin
+lb02 ansible_ssh_host=192.168.1.2 ansible_ssh_user=myadmin
 
 ### The [masterg] is the k8s control plane nodes' group
 [masterg]
@@ -384,8 +384,75 @@ worker03 ansible_ssh_host=192.168.1.8 ansible_ssh_user=myadmin
 ```
 
 
+2.3 Make an ansible hot command to test, and you will see the output is "...uid=0(root)..."
+
+```
+$ ansible all -m shell -a id -b
+worker02 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+worker03 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+master01 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+lb01 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+worker01 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+master03 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+lb02 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+master02 | CHANGED | rc=0 >>
+uid=0(root) gid=0(root) groups=0(root)
+
+```
+<img width="310" alt="image" src="https://user-images.githubusercontent.com/9592837/217158561-7b228474-72a1-4efa-85cf-ce5de5565dce.png">
+
+2.4 Modify the deploy-cluster.yaml
+
+```
+vi deploy-cluster.yaml
+...(Skipped)
+- name: Deploy Load Balancers
+  hosts: lbg
+  become: yes
+  vars:
+### Change me if you are deploying multiple master nodes
+### Change the k8s_vip that will set it to keepalived
+### If you are going to deploy Load Balancers, you need to assign a VIP, e.g., 192.168.0.10/24.
+    k8s_vip: '192.168.1.0/22'
+  roles:
+    - role-lbg
+...(Skipped)
+
+- name: Deploy k8s nodes
+  hosts: masterg,workerg
+  become: yes
+  vars:
+### Change me(must)
+### k8s_vip: If you are going to deploy Load Balancers, this k8s_vip should the same as above, e.g., 192.168.0.10
+###          If you are not going to deploying multiple master nodes, this k8s_vip should be MASTER-NODE-IP
+### k8s_version: This playbook is going to install "1.25.0"
+### pod_cidr: This ip pool will be will by pods. If change it, make sure is /16
+### k8s_packages: The verison should be the same as k8s_version.
+    k8s_vip: "192.168.1.0"
+    k8s_version: "1.25.0"
+    pod_cidr: "10.10.0.0/16"
+...(Skipped)
+
+```
+
+<img width="885" alt="image" src="https://user-images.githubusercontent.com/9592837/217159377-14db3e9e-0ae8-42ca-8031-47510bf22dc7.png">
 
 
+2.5 Run the playbook - deploy-cluster.yaml
 
+```
+ansible-playbook deploy-cluster.yaml
+```
+
+You should see the ansible play recap like this, with failed=0
+
+<img width="832" alt="image" src="https://user-images.githubusercontent.com/9592837/217160817-396dcd73-737b-4f4d-b582-d41831b8ee5f.png">
 
 
