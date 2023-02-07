@@ -207,9 +207,9 @@ My demo environment:
 1.1 Clone the repo
 
 ```
-# login to ansible node as myadmin, and make a Projects folder and clone the repo
+# login to ansible node as myadmin, and make a Demo1 folder and clone the repo
 
-mkdir Projects && cd Projects
+mkdir Demo1 && cd Demo1
 git clone https://github.com/williamlui00/Ansible-K8S.git
 cd Ansible-K8S
 
@@ -322,4 +322,70 @@ kubectl get pods -o wide
 
 # Demo 2, deploy a highly available cluster
 
-To Be Continued...
+Description:
+
+This part is going to demo how to set up a highly available K8S cluster. The cluster is following "kubeadm HA topolagy - stacked etcd". 
+
+<img width="632" alt="image" src="https://user-images.githubusercontent.com/9592837/217154972-48b4340b-5ec6-4fd8-9200-bb833d79138b.png">
+
+Refer https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/
+
+My demo environment:
+
+- One Anisble node
+- One Master node:
+    - hostname: master01, master02, and master03
+    - host ip: 192.168.1.3, 192.168.1.4, and 192.168.1.5
+- Three worker nodes:
+    - hostname: worker01, worker02, and worker03
+    - ips: 192.168.1.6, 192.168.1.7, and 192.168.1.8
+- Two load balancer nodes nodes:
+    - hostname: lb01 and lb02
+    - ips: 192.168.1.1, 192.168.1.2
+- VIP for the load balancer: 192.168.1.0/22
+
+2.1 Clone the repo
+
+```
+# login to ansible node as myadmin, and make a Demo2 folder and clone the repo
+
+mkdir Demo2 && cd Demo2
+git clone https://github.com/williamlui00/Ansible-K8S.git
+cd Ansible-K8S
+
+```
+
+2.2 Modify ansible inventory, 
+
+```
+### Don't change the group name or delete the group
+### Add a host entry under a related group
+### Host entry format: HOSTNAME ansible_ssh_host=HOST-IP
+### Empty host entry of a group that means the role will not be deployed
+### If the ssh remote user is not myadmin, please change it. 
+
+### The [lbg] is the load balancer nodes' group
+[lbg]
+lb01 ansible_ssh_host=192.168.1.1 ansible_ssh_user=myadmin
+lb02 ansible_ssh_host=192.168.1.1 ansible_ssh_user=myadmin
+
+### The [masterg] is the k8s control plane nodes' group
+[masterg]
+master01 ansible_ssh_host=192.168.1.3 ansible_ssh_user=myadmin
+master02 ansible_ssh_host=192.168.1.4 ansible_ssh_user=myadmin
+master03 ansible_ssh_host=192.168.1.5 ansible_ssh_user=myadmin
+
+### The [workerg] is the k8s worker nodes' group
+[workerg]
+worker01 ansible_ssh_host=192.168.1.6 ansible_ssh_user=myadmin
+worker02 ansible_ssh_host=192.168.1.7 ansible_ssh_user=myadmin
+worker03 ansible_ssh_host=192.168.1.8 ansible_ssh_user=myadmin
+
+```
+
+
+
+
+
+
+
