@@ -14,10 +14,11 @@ This project is going to deploy a K8S cluster by using Ansible. It could deploy 
 - The K8S node will act as a K8S role (Load Balancer Node, Master Node, or Worker Node) after running the playbook. 
 
 **Remarks:**
-Currently, it only support on "Ubuntu 20.04 LTS".
-Support Kubernetes Version: v1.24, v1.25, and v1.26
-Network Plugin: Calico
-Load Balancer software: HAProxy, and Keepalived
+
+- Currently, it only support on "Ubuntu 20.04 LTS".
+- Support Kubernetes Version: v1.24, v1.25, and v1.26
+- Network Plugin: Calico
+- Load Balancer software: HAProxy, and Keepalived
 
 ## Part 1. Requirement
 
