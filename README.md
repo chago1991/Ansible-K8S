@@ -13,75 +13,11 @@ This project is going to deploy a K8S cluster by using Ansible. It could deploy 
 - The Ansible Playbook (deploy-cluster.yaml) will apply the related role(s) to the K8S node based on the assigned group. 
 - The K8S node will act as a K8S role (Load Balancer Node, Master Node, or Worker Node) after running the playbook. 
 
-```
-.
-├── ansible.cfg
-├── deploy-cluster.yaml
-├── hosts
-├── README.md
-├── roles
-│   ├── role-containerd
-│   │   ├── defaults
-│   │   │   └── main.yml
-│   │   ├── files
-│   │   ├── handlers
-│   │   │   └── main.yml
-│   │   ├── meta
-│   │   │   └── main.yml
-│   │   ├── README.md
-│   │   ├── tasks
-│   │   │   └── main.yml
-│   │   ├── templates
-│   │   │   ├── temp-containerd.conf.j2
-│   │   │   └── temp-containerd.service.j2
-│   │   ├── tests
-│   │   │   ├── inventory
-│   │   │   └── test.yml
-│   │   └── vars
-│   │       └── main.yml
-│   ├── role-k8s
-│   │   ├── defaults
-│   │   │   └── main.yml
-│   │   ├── files
-│   │   ├── handlers
-│   │   │   └── main.yml
-│   │   ├── meta
-│   │   │   └── main.yml
-│   │   ├── README.md
-│   │   ├── tasks
-│   │   │   └── main.yml
-│   │   ├── templates
-│   │   ├── tests
-│   │   │   ├── inventory
-│   │   │   └── test.yml
-│   │   └── vars
-│   │       └── main.yml
-│   └── role-lbg
-│       ├── defaults
-│       │   └── main.yml
-│       ├── files
-│       ├── handlers
-│       │   └── main.yml
-│       ├── meta
-│       │   └── main.yml
-│       ├── README.md
-│       ├── tasks
-│       │   └── main.yml
-│       ├── templates
-│       │   ├── temp-haproxy.j2
-│       │   └── temp-keepalived.j2
-│       ├── tests
-│       │   ├── inventory
-│       │   └── test.yml
-│       └── vars
-│           └── main.yml
-└── templates
-    └── temp-hosts.j2
-
-29 directories, 33 files
-```
-**limitation**
+**Remarks:**
 Currently, it only support on "Ubuntu 20.04 LTS".
+Support Kubernetes Version: v1.24, v1.25, and v1.26
+Network Plugin: Calico
+Load Balancer software: HAProxy, and Keepalived
 
 ## Part 1. Requirement
 
