@@ -456,3 +456,32 @@ You should see the ansible play recap like this, with failed=0
 <img width="832" alt="image" src="https://user-images.githubusercontent.com/9592837/217160817-396dcd73-737b-4f4d-b582-d41831b8ee5f.png">
 
 
+2.6 Login to master01 as myadmin to check the nodes status. The nodes may take a few minutes to be ready.
+```
+kubectl get nodes
+```
+
+<img width="473" alt="image" src="https://user-images.githubusercontent.com/9592837/217161503-1801da0c-d187-486b-b93f-02840b564449.png">
+
+2.7 Testing kubectl 
+
+- Create a test deployment
+
+```
+kubectl create deployment --replicas 3 --image nginx my-nginx
+```
+
+- Create get the pods
+
+```
+kubectl get pods
+kubectl get pods -o wide
+```
+
+<img width="433" alt="image" src="https://user-images.githubusercontent.com/9592837/217162785-eaa4674b-b7b6-4bb9-b772-17462d781742.png">
+
+<img width="963" alt="image" src="https://user-images.githubusercontent.com/9592837/217162876-602646c9-6024-4f31-a911-7e5068966b37.png">
+
+
+
+
