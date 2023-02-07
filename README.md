@@ -316,7 +316,7 @@ kubectl get pods -o wide
 ```
 <img width="969" alt="image" src="https://user-images.githubusercontent.com/9592837/216815784-85951c5b-1958-4c99-8a0a-dbd235681d11.png">
 
-<Demo 1 done>
+<Demo1 Done>
 
 
 
@@ -482,6 +482,6 @@ kubectl get pods -o wide
 
 <img width="963" alt="image" src="https://user-images.githubusercontent.com/9592837/217162876-602646c9-6024-4f31-a911-7e5068966b37.png">
 
-
+<Demo2 Done>
 
 
