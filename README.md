@@ -19,6 +19,7 @@ This project is going to deploy a K8S cluster by using Ansible. It could deploy 
 - Support Kubernetes Version: v1.24, v1.25, and v1.26
 - Network Plugin: Calico
 - Load Balancer software: HAProxy, and Keepalived
+- Container Run Time: Containerd v1.6.16
 
 ## Part 1. Requirement
 
