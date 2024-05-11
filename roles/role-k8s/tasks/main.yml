@@ -1,62 +1,69 @@
 ---
 # tasks file for roles/role-k8s
-#
 
-# Download Google apt gpg key
-- name: Download Google apt gpg key
-  ansible.builtin.get_url:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    dest: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+# tasks file for kubernetes
+- name: Download Kubernetes signing key for v1.29
+  get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+    dest: /tmp/kubernetes-1.29-apt-keyring.gpg
+    mode: 0644
 
-# Disable swap and add apt repo
-- name: Disable swap and apt repo
-  ansible.builtin.shell: |
-    swapoff -a
-    sed -i 's/.*swap.*//g' /etc/fstab
-    echo "deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-  args:
-    executable: /bin/bash
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+- name: Check if Kubernetes signing key exists
+  stat:
+    path: /etc/apt/keyrings/kubernetes-1.29-apt-keyring.gpg
+  register: key_stat
 
-# Install apt-transport-https ca-certificates curl
-- name: Install apt-transport-https ca-certificates curl
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-  - apt-transport-https 
-  - ca-certificates 
-  - curl
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+- name: Import Kubernetes signing key (if missing)
+  command: gpg --dearmor -o /etc/apt/keyrings/kubernetes-1.29-apt-keyring.gpg /tmp/kubernetes-1.29-apt-keyring.gpg
+  when: not key_stat.stat.exists
 
-# Update the apt cache
-- name: Update the apt cache
-  ansible.builtin.apt:
+- name: Add Kubernetes repository for v1.29
+  lineinfile:
+    path: /etc/apt/sources.list.d/kubernetes-1.29.list
+    create: yes
+    line: 'deb [signed-by=/etc/apt/keyrings/kubernetes-1.29-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /'
+
+- name: Update package lists
+  apt:
     update_cache: yes
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
 
-# Install kubelet kubeadm and kubectl
-- name: Install kubelet kubeadm and kubectl
-  ansible.builtin.package:
-    name: "{{ k8s_packages }}"
+- name: Install k8s packages
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - kubelet={{ K8S_VERSION }} 
+    - kubeadm={{ K8S_VERSION }}
+    - kubectl={{ K8S_VERSION }}
+    
+- name: Template /etc/modules-load.d/k8s.conf
+  template:
+    src: ../templates/k8s.conf
+    dest: /etc/modules-load.d/k8s.conf
+    owner: root
+    group: root
+    mode: '0755'
+ 
+- name: Template /etc/sysctl.d/k8s.conf
+  template:
+    src: ../templates/k8s-sysctl.conf
+    dest: /etc/sysctl.d/k8s.conf
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: sysctl
+  shell: "sysctl --system"
+
+- name: "modprobe overlay"
+  modprobe:
+    name: overlay
     state: present
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+
+- name: "modprobe br_netfilter"
+  modprobe:
+    name: br_netfilter
+    state: present
 
 # Disable kubelet kubeadm kubectl from apt upgrade
 - name: Disable kubelet kubeadm and kubectl from apt upgrade
@@ -138,7 +145,7 @@
 # Install Calico network plugin
 - name: Install Calico network plugin
   shell: |
-    curl https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml -O
+    curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml -O
     kubectl apply -f calico.yaml
   args:
     executable: /bin/bash

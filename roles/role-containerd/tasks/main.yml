@@ -1,7 +1,36 @@
----
-# tasks file for roles/role-containerd
+# ---
+# # tasks file for roles/role-containerd
+######common-setup###
+- name: Disable IPv6 with sysctl
+  sysctl: name={{ item }} value=1 state=present
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+    - net.ipv6.conf.lo.disable_ipv6
 
-# Update system
+- name: Enable br_netfilter module 
+  shell:  modprobe br_netfilter 
+
+- name: sysctl --system disabling IPv6
+  shell:  sysctl --system 
+
+- name: Disable swap
+  command: swapoff -a
+  
+- name: Disable SWAP in fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Template /etc/apt/sources.list 
+  template:
+    src: ../templates/sources.list
+    dest: /etc/apt/sources.list 
+    owner: root
+    group: root
+    mode: '0644'
+    
 - name: Update system
   ansible.builtin.package:
     name: '*'
@@ -11,7 +40,19 @@
   retries: 2
   delay: 5
 
-# Enable overlay and br_netfilter kernel modules
+- name: Install pre-requires
+  apt:
+    update_cache: true
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - gpg
+    - htop
+    - curl
+    - wget
+
+
+# # Enable overlay and br_netfilter kernel modules
 - name: Enable overlay and br_netfilter
   community.general.modprobe:
     name: "{{ item }}"
@@ -24,7 +65,7 @@
   retries: 2
   delay: 5
 
-# Add overlay and br_netfilter kernel modules at boot
+# # Add overlay and br_netfilter kernel modules at boot
 - name: Add overlay br_netfilter
   template:
     src: ./roles/role-containerd/templates/temp-containerd.conf.j2
@@ -34,15 +75,6 @@
   retries: 2
   delay: 5
 
-# Add containerd.service file
-- name: Add overlay br_netfilter
-  template:
-    src: ./roles/role-containerd/templates/temp-containerd.service.j2
-    dest: /lib/systemd/system/containerd.service
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
 
 # Enable net.ipv4.ip_forward, net.bridge.bridge-nf-call-iptables and net.bridge.bridge-nf-call-ip6tables
 - name: Enable kernel parameters
@@ -62,50 +94,89 @@
   retries: 2
   delay: 5
 
-# Install runc
-- name: Install runc
-  ansible.builtin.package:
-    name: 
-    - runc
-    - bash-completion
-    state: latest
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
 
-# Download containerd
-- name: Download containerd
+- name: Template /etc/modules-load.d/containerd.conf
+  template:
+    src: ../templates/containerd.conf
+    dest: /etc/modules-load.d/containerd.conf
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: sysctl --system
+  shell: "sysctl --system"
+
+- name: Get containerd-{{ CONTAINERD_VERSION }}-linux-amd64.tar.gz
   get_url:
-    url: https://github.com/containerd/containerd/releases/download/v1.6.16/containerd-1.6.16-linux-amd64.tar.gz
-    dest: /tmp/containerd-1.6.16-linux-amd64.tar.gz
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5  
+    url: https://github.com/containerd/containerd/releases/download/v{{ CONTAINERD_VERSION }}/containerd-{{ CONTAINERD_VERSION }}-linux-amd64.tar.gz
+    dest: /opt/containerd-{{ CONTAINERD_VERSION }}-linux-amd64.tar.gz
+    mode: '0644'
 
-# Install and config containerd
-- name: Install and config containerd
-  shell: |
-    tar xvf /tmp/containerd-1.6.16-linux-amd64.tar.gz -C /usr
-    mkdir -p /etc/containerd
-    containerd config default > /etc/containerd/config.toml
-    sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
-  args:
-    executable: /bin/bash
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+- name: Template install-containerd.sh 
+  template: 
+    src: ../templates/install-containerd.yml.j2
+    dest: /opt/install-containerd.sh
+    owner: root
+    group: root
+    mode: '0755'
 
-# Enable and restart containerd service
-- name: Enable and restart containerd service
-  service: 
-    name: containerd
-    state: restarted
-    enabled: true
-  register: result
-  until: result.failed == false
-  retries: 2
-  delay: 5
+- name: Get runc-{{ RUNC_VERSION }}.amd64
+  get_url: 
+    url: https://github.com/opencontainers/runc/releases/download/{{ RUNC_VERSION }}/runc.amd64
+    dest: /usr/local/sbin/runc
+    mode: '0755'
+
+- name: Ensure /etc/systemd/system/kubelet.service.d directory exists
+  file:
+    path: /etc/systemd/system/kubelet.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Template containerd.service
+  template:
+    src: ../templates/containerd.service
+    dest: /etc/systemd/system/containerd.service
+    owner: root
+    group: root
+    mode: '0755'
+  notify: 
+  - daemon reload 
+
+- name: Get containerd.service file 
+  get_url: 
+    url: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+    dest: /opt/containerd.service
+    mode: '0644'
+
+- name: Get crictl 
+  get_url: 
+    url: https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ CRICTL_VERSION }}/crictl-{{ CRICTL_VERSION }}-linux-amd64.tar.gz
+    dest: /opt/crictl-{{ CRICTL_VERSION }}-linux-amd64.tar.gz
+    mode: '0644'
+
+- name: Run /opt/install-containerd.sh
+  command: chdir=/opt/ sh install-containerd.sh 
+
+- name: Enable containerd service
+  systemd: name=containerd enabled=yes
+
+- name: Start containerd service
+  systemd: name=containerd state=started 
+
+- name: Template kubelet.service.d/0-containerd.conf
+  template:
+    src: ../templates/0-containerd.conf
+    dest: /etc/systemd/system/kubelet.service.d/0-containerd.conf
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Reload daemon-reload 
+  systemd: daemon_reload=yes
+
+- name: Restart containerd service
+  systemd: name=containerd state=restarted
+
 

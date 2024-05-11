@@ -25,7 +25,7 @@
 ### Change me if you are deploying multiple master nodes
 ### Change the k8s_vip that will set it to keepalived
 ### If you are going to deploy Load Balancers, you need to assign a VIP, e.g., 192.168.0.10/24.
-    k8s_vip: 'xxx.xxx.xxx/xx'
+    k8s_vip: '192.168.88.200/24'
   roles:
     - role-lbg
 
@@ -45,12 +45,12 @@
 ### k8s_version: This playbook is going to install "1.25.0"
 ### pod_cidr: This ip pool will be will by pods. If change it, make sure is /16
 ### k8s_packages: The verison should be the same as k8s_version.
-    k8s_vip: "xxx.xxx.xxx.xxx"
-    k8s_version: "1.25.0"
+    k8s_vip: "192.168.88.200"
+    k8s_version: "1.29.0"
     pod_cidr: "10.10.0.0/16"
     k8s_packages:
-    - "kubelet=1.25.0-00"
-    - "kubeadm=1.25.0-00"
-    - "kubectl=1.25.0-00"
+    - "kubelet=1.29.1-00"
+    - "kubeadm=1.29.1-00"
+    - "kubectl=1.29.1-00"
   roles:
     - role-k8s

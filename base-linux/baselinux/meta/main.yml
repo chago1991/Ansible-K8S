@@ -1,0 +1,14 @@
+galaxy_info:
+  author: David Chaganava
+  description: This Ansible role configures Red Hat and Debian-based Linux systems, handling hostname, timezone, SSH settings, system packages, repositories, SELinux, UFW, and customizations like banners.
+
+  min_ansible_version: 2.4
+
+  platforms:
+  - name: RHEL
+    versions:
+    - 8.7
+    - 7.9
+  - name: debian
+    versions:
+    - 11

@@ -1,0 +1,33 @@
+# name: Deploy
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+
+#       - name: Modify inventory file
+#         run: |
+#           sed -i "s|<ETCD_1_IP>|${{ secrets.ETCD_1_IP }}|" inventory.ini
+#           sed -i "s|<ETCD_2_IP>|${{ secrets.ETCD_2_IP }}|" inventory.ini
+#           sed -i "s|<ETCD_3_IP>|${{ secrets.ETCD_3_IP }}|" inventory.ini
+#           sed -i "s|<MASTER_1_IP>|${{ secrets.MASTER_1_IP }}|" inventory.ini
+#           sed -i "s|<MASTER_2_IP>|${{ secrets.MASTER_2_IP }}|" inventory.ini
+#           sed -i "s|<WORKER_1_IP>|${{ secrets.WORKER_1_IP }}|" inventory.ini
+#           sed -i "s|<WORKER_2_IP>|${{ secrets.WORKER_2_IP }}|" inventory.ini
+#           sed -i "s|<HAPROXY_1_IP>|${{ secrets.HAPROXY_1_IP }}|" inventory.ini
+#           sed -i "s|<HAPROXY_2_IP>|${{ secrets.HAPROXY_2_IP }}|" inventory.ini
+#           sed -i "s|<SSH_PORT>|${{ secrets.SSH_PORT }}|" inventory.ini
+#           sed -i "s|<VIRTUAL_IP>|${{ secrets.VIRTUAL_IP }}|" haproxy-keepalived-role/templates/first-keepalived-cfg.sh
+#           sed -i "s|<VIRTUAL_IP>|${{ secrets.VIRTUAL_IP }}|" haproxy-keepalived-role/templates/second-keepalived-cfg.sh
+#           sed -i "s|<VIRTUAL_IP>|${{ secrets.VIRTUAL_IP }}|" control-plane-role/templates/kubeadm-config.sh
+
+#       - name: Run playbook
+#         run: ansible-playbook -i inventory.ini playbook.yml --extra-vars "extras=${{ secrets.extras }} limit=${{ secrets.limit }} tags=${{ secrets.tags }}"
