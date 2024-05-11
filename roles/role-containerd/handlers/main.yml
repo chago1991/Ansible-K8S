@@ -1,2 +1,5 @@
 ---
 # handlers file for roles/role-containerd
+  - name: daemon reload
+    systemd:
+      daemon_reload: yes

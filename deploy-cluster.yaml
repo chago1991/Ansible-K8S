@@ -4,10 +4,12 @@
 - name: Get hosts' variables
   hosts: all
   become: no
+  remote_user: root
 
 - name: Create /etc/hosts file
   hosts: all
   become: yes
+  remote_user: root
   tasks:
   - name: Generate /etc/hosts
     template:
@@ -21,6 +23,7 @@
 - name: Deploy Load Balancers
   hosts: lbg
   become: yes
+  remote_user: root
   vars:
 ### Change me if you are deploying multiple master nodes
 ### Change the k8s_vip that will set it to keepalived
@@ -32,11 +35,13 @@
 - name: Deploy containerd
   hosts: masterg,workerg
   become: yes
+  remote_user: root
   roles:
     - role-containerd
 
 - name: Deploy k8s nodes
   hosts: masterg,workerg
+  remote_user: root
   become: yes
   vars:
 ### Change me(must)
@@ -46,7 +51,7 @@
 ### pod_cidr: This ip pool will be will by pods. If change it, make sure is /16
 ### k8s_packages: The verison should be the same as k8s_version.
     k8s_vip: "192.168.88.200"
-    k8s_version: "1.29.0"
+    k8s_version: "1.29.1"
     pod_cidr: "10.10.0.0/16"
     k8s_packages:
     - "kubelet=1.29.1-00"

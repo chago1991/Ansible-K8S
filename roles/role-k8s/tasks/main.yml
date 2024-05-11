@@ -76,10 +76,17 @@
   retries: 2
   delay: 5
 
+- name: Reset Cluster
+  command: >
+    kubeadm reset --force
+  register: kubeadm_reset
+  #when: master_ready is failed
+
+
 # Initial K8S cluster on the first master node
 - name: kubeadm init on the first master node
   shell: |
-    kubeadm init --control-plane-endpoint {{ k8s_vip }}:6443 --upload-certs --kubernetes-version {{ k8s_version }} --pod-network-cidr {{ pod_cidr }} > kubeadm-init-output.txt
+    kubeadm init --control-plane-endpoint {{ k8s_vip }}:6443 --upload-certs --kubernetes-version {{ k8s_version }} --pod-network-cidr {{ pod_cidr }} --ignore-preflight-errors=all > kubeadm-init-output.txt
   args:
     executable: /bin/bash
   when: ansible_hostname == groups.masterg[0]
