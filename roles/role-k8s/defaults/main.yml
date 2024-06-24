@@ -1,2 +1,7 @@
 ---
-# defaults file for roles/role-k8s
+kubernetes_outputs_folder: "k8s_outputs"
+kubernetes_outputs_dir: "{{ ansible_env.HOME }}/{{ kubernetes_outputs_folder }}"
+
+Kubernetes_cilium_version: v0.16.10
+kubernetes_network_provider: cilium # calico
+kubernetes_cilium_init: true

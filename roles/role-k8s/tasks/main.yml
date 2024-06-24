@@ -1,5 +1,10 @@
 ---
 # tasks file for roles/role-k8s
+- name: create folder for kubernetes outputs
+  file:
+    path: "{{ kubernetes_outputs_dir }}"
+    state: directory
+    recurse: yes
 
 # tasks file for kubernetes
 - name: Download Kubernetes signing key for v1.29
@@ -157,4 +162,45 @@
   args:
     executable: /bin/bash
   become: no
-  when: ansible_hostname == groups.masterg[0]
+  when: 
+    - ansible_hostname == groups.masterg[0]
+    - kubernetes_network_provider == "calico"
+
+- name: download cilium zipped archive
+  get_url:
+    url: https://github.com/cilium/cilium-cli/releases/download/{{ Kubernetes_cilium_version }}/cilium-linux-amd64.tar.gz
+    dest: "{{ kubernetes_outputs_dir }}/cilium-linux-amd64.tar.gz"
+  when: 
+    - ansible_hostname == groups.masterg[0]
+    - kubernetes_network_provider == "cilium"
+    - kubernetes_cilium_init|bool
+
+- name: extract cilium zipped archive
+  unarchive:
+    src: "{{ kubernetes_outputs_dir }}/cilium-linux-amd64.tar.gz"
+    dest: "{{ kubernetes_outputs_dir }}"
+    remote_src: yes
+  when:
+    - ansible_hostname == groups.masterg[0] 
+    - kubernetes_network_provider == "cilium"
+    - kubernetes_cilium_init|bool
+
+- name: copy cilium bin file
+  copy:
+    src: "{{ kubernetes_outputs_dir }}/cilium"
+    dest: /usr/local/bin/
+    remote_src: yes
+    mode: preserve
+  when: 
+    - ansible_hostname == groups.masterg[0]
+    - kubernetes_network_provider == "cilium"
+    - kubernetes_cilium_init|bool
+
+- name: install kubernetes network provider cilium
+  shell: cilium install > {{ kubernetes_outputs_dir }}/network_provider_cilium_installed
+  when: 
+    - ansible_hostname == groups.masterg[0]
+    - kubernetes_network_provider == "cilium"
+    - kubernetes_cilium_init|bool
+  args:
+    creates: "{{ kubernetes_outputs_dir }}/network_provider_cilium_installed"
