@@ -1,5 +1,10 @@
 #### This is the playbook to deploy the k8s cluster
 #### Check below Change me
+- hosts: all
+  remote_user: root
+  strategy: free
+  roles:
+    - ./base-linux/baselinux
 
 - name: Get hosts' variables
   hosts: all
